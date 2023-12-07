@@ -1,0 +1,31 @@
+<script type="text/javascript" src="Typewriter.js"></script>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const messages = [
+            'Typewriter :)',
+            'hello',
+            'this is a message :)',
+            '...and another message!',
+        ];
+
+        new Typewriter(document.getElementById("typewriter"), messages, {
+            pause: 10,
+            count: 0,
+            current: 0,
+            typing: {
+                speed: 50,
+            },
+            cursor: {
+                delay: 200,
+                symbol: "|",
+            }
+        });
+
+    });
+
+</script>
+
+<div id="typewriter"></div>
