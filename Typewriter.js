@@ -55,8 +55,8 @@ class Typewriter {
         this.config = config;
         this.cursor = cursorDiv;
         this.text = textDiv;
-        this.cursorSymbol = "|";
-        this.cursorInterval = setInterval(() => {
+        this.cursorSymbol = this.config.cursor.symbol ? this.config.cursor.symbol : "|";
+        this.cursorAnimation = setInterval(() => {
             if (this.config.cursor.symbol === "|") {
                 this.config.cursor.symbol = "";
             } else {
