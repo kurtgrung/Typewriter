@@ -3,6 +3,7 @@
 # Typewriter
 Javascript Typewriter Effect 
 
-This is a Vanilla Javascript Class I will add React component next. 
+/Javascript = Javascript Vanilla Class & example.
+/React = React Typescript JSX component. 
 
 Typewriter <a target="_blank" href="https://jsfiddle.net/kurtgrung/oc9qwvp6/124/">Demo</a>.
