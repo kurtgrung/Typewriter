@@ -2,6 +2,23 @@
 
 import React, { useEffect, useRef } from 'react';
 
+interface TypewriterStyle {
+    [key: string]: string | undefined;
+    fontSize?: string;
+    fontFamily?: string;
+    background?: string;
+    color?: string;
+    borderRadius?: string;
+    width?: string;
+    padding?: string;
+    paddingLeft?: string;
+    paddingRight?: string;
+    lineHeight?: string;
+    height?: string;
+    display?: string;
+    marginLeft?: string;
+}
+
 interface TypewriterProps {
     messages: string[];
     pause: number;
@@ -17,6 +34,7 @@ const Typewriter: React.FC<TypewriterProps> = ({
     cursorDelay,
     cursorSymbol,
 }) => {
+
     const typewriterRef = useRef<HTMLDivElement>(null);
     const hasMounted = useRef(false);
 
@@ -33,7 +51,9 @@ const Typewriter: React.FC<TypewriterProps> = ({
         cursorDiv.setAttribute('id', 'cursor');
         typewriterDiv.appendChild(cursorDiv);
 
-        const typewriterStyle = {
+        // TODO - make styles dynamically configurable
+
+        const typewriterStyle: TypewriterStyle = {
             fontSize: '2em',
             fontFamily: 'arial',
             background: 'black',
@@ -47,25 +67,25 @@ const Typewriter: React.FC<TypewriterProps> = ({
             height: '50px',
         };
 
-        const textStyle = {
+        const textStyle: TypewriterStyle = {
             display: 'inline-block',
         };
 
-        const cursorStyle = {
+        const cursorStyle: TypewriterStyle = {
             marginLeft: '7px',
             display: 'inline-block',
         };
 
-        for (let style in typewriterStyle) {
-            typewriterDiv.style[style] = typewriterStyle[style];
+        if (typewriterDiv) {
+            Object.assign(typewriterDiv.style, typewriterStyle);
         }
 
-        for (let style in textStyle) {
-            textDiv.style[style] = textStyle[style];
+        if (textDiv) {
+            Object.assign(textDiv.style, textStyle);
         }
 
-        for (let style in cursorStyle) {
-            cursorDiv.style[style] = cursorStyle[style];
+        if (cursorDiv) {
+            Object.assign(cursorDiv.style, cursorStyle);
         }
 
         const typingConfig = {
@@ -90,12 +110,12 @@ const Typewriter: React.FC<TypewriterProps> = ({
         }, typingConfig.cursor.delay);
 
         const typing = () => {
-            const message = messages[typingConfig.current];
+            const message = messages[typingConfig.current] as string;
             if (typingConfig.count < message.length) {
                 const m = message.charAt(typingConfig.count);
                 textDiv.innerHTML += m;
                 typingConfig.count++;
-                setTimeout(() => typing(), typingConfig.typing.speed);
+                setTimeout(typing, typingConfig.typing.speed);
             } else {
                 const waitInterval = setInterval(() => {
                     clearInterval(waitInterval);
@@ -103,11 +123,11 @@ const Typewriter: React.FC<TypewriterProps> = ({
                     backspace();
                 }, pause * 100);
             }
-        }
+        };
 
         const backspace = () => {
-            const message = messages[typingConfig.current];
-            if (typingConfig.count < message.length) {
+            const message = messages[typingConfig.current] as string;
+            if (typingConfig.count <= message.length) {
                 let m = '';
                 if (typingConfig.count === 0) {
                     m = message;
@@ -117,7 +137,7 @@ const Typewriter: React.FC<TypewriterProps> = ({
                 textDiv.innerHTML = m;
                 typingConfig.count++;
                 if (messages.length !== 1) {
-                    setTimeout(() => backspace(), typingConfig.typing.speed / 10);
+                    setTimeout(backspace, typingConfig.typing.speed / 10);
                 }
             } else {
                 textDiv.innerHTML = '';
@@ -136,11 +156,12 @@ const Typewriter: React.FC<TypewriterProps> = ({
             }
         };
 
+        cursorAnimation;
         typing();
-
         hasMounted.current = true;
 
     }, [messages, pause, typingSpeed, cursorDelay, cursorSymbol]);
+
 
     return <div id="typewriter" ref={typewriterRef}></div>;
 };
