@@ -8,6 +8,9 @@ class Typewriter {
 
         const typewriterDiv = div;
 
+        config.cursor.symbol = config.cursor.symbol || "|";
+        config.cursor.active = config.cursor.symbol;
+
         const textDiv = document.createElement('div');
         textDiv.setAttribute("id", "text");
         document.getElementById('typewriter').appendChild(textDiv);
@@ -57,12 +60,12 @@ class Typewriter {
         this.text = textDiv;
         this.cursorSymbol = this.config.cursor.symbol ? this.config.cursor.symbol : "|";
         this.cursorAnimation = setInterval(() => {
-            if (this.config.cursor.symbol === "|") {
-                this.config.cursor.symbol = "";
+            if (this.config.cursor.active === this.config.cursor.symbol) {
+                this.config.cursor.active = '';
             } else {
-                this.config.cursor.symbol = "|";
+                this.config.cursor.active = this.config.cursor.symbol;
             }
-            this.cursor.innerHTML = this.config.cursor.symbol;
+            this.cursor.innerHTML = this.config.cursor.active;
         }, this.config.cursor.delay);
         this.typing();
     }

@@ -97,16 +97,17 @@ const Typewriter: React.FC<TypewriterProps> = ({
             cursor: {
                 delay: cursorDelay,
                 symbol: cursorSymbol,
+                active: cursorSymbol,
             },
         };
 
         const cursorAnimation = setInterval(() => {
-            if (typingConfig.cursor.symbol === '|') {
-                typingConfig.cursor.symbol = '';
+            if (typingConfig.cursor.active === typingConfig.cursor.symbol) {
+                typingConfig.cursor.active = '';
             } else {
-                typingConfig.cursor.symbol = '|';
+                typingConfig.cursor.active = typingConfig.cursor.symbol;
             }
-            cursorDiv.innerHTML = typingConfig.cursor.symbol;
+            cursorDiv.innerHTML = typingConfig.cursor.active;
         }, typingConfig.cursor.delay);
 
         const typing = () => {
