@@ -4,7 +4,7 @@
 Javascript Typewriter Effect 
 
 Vanilla Javascript Class & example. <br>
-React Typescript JSX component. 
+React Typescript JSX component. <br>
 Vue/Nuxt version. <br>
 
 Vanilla <a target="_blank" href="https://jsfiddle.net/kurtgrung/oc9qwvp6/124/">Demo</a> <br>
