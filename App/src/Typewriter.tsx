@@ -1,170 +1,120 @@
 // Typewriter by Kurt Grüng.
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface TypewriterStyle {
-    [key: string]: string | undefined;
-    fontSize?: string;
-    fontFamily?: string;
-    background?: string;
-    color?: string;
-    borderRadius?: string;
-    width?: string;
-    padding?: string;
-    paddingLeft?: string;
-    paddingRight?: string;
-    lineHeight?: string;
-    height?: string;
-    display?: string;
-    marginLeft?: string;
+  [key: string]: string | undefined;
+}
+
+interface StyleConfig {
+  wrapper?: TypewriterStyle;
+  text?: TypewriterStyle;
+  cursor?: TypewriterStyle;
 }
 
 interface TypewriterProps {
-    messages: string[];
-    pause: number;
-    typingSpeed: number;
-    cursorDelay: number;
-    cursorSymbol: string;
+  messages: string[];
+  pause: number;
+  typingSpeed: number;
+  cursorDelay: number;
+  cursorSymbol: string;
+  style?: StyleConfig;
 }
 
 const Typewriter: React.FC<TypewriterProps> = ({
-    messages,
-    pause,
-    typingSpeed,
-    cursorDelay,
-    cursorSymbol,
+  messages,
+  pause,
+  typingSpeed,
+  cursorDelay,
+  cursorSymbol,
+  style = {},
 }) => {
+  const [text, setText] = useState('');
+  const [cursorVisible, setCursorVisible] = useState(true);
 
-    const typewriterRef = useRef<HTMLDivElement>(null);
-    const hasMounted = useRef(false);
+  const state = useRef({
+    currentMessageIndex: 0,
+    charIndex: 0,
+    isTyping: true,
+    timeout: null as ReturnType<typeof setTimeout> | null,
+  });
 
-    useEffect(() => {
-        const typewriterDiv = typewriterRef.current;
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCursorVisible((prev) => !prev);
+    }, cursorDelay);
 
-        if (!typewriterDiv || hasMounted.current) return;
+    return () => clearInterval(interval);
+  }, [cursorDelay]);
 
-        const textDiv = document.createElement('div');
-        textDiv.setAttribute('id', 'text');
-        typewriterDiv.appendChild(textDiv);
+  useEffect(() => {
+    const localState = state.current;
 
-        const cursorDiv = document.createElement('div');
-        cursorDiv.setAttribute('id', 'cursor');
-        typewriterDiv.appendChild(cursorDiv);
+    const step = () => {
+      const currentMessage = messages[localState.currentMessageIndex];
 
-        // TODO - make styles dynamically configurable
-
-        const typewriterStyle: TypewriterStyle = {
-            fontSize: '2em',
-            fontFamily: 'arial',
-            background: 'black',
-            color: 'white',
-            borderRadius: '5px',
-            width: 'fit-content',
-            padding: '5px',
-            paddingLeft: '15px',
-            paddingRight: '20px',
-            lineHeight: '1.4em',
-            height: '50px',
-        };
-
-        const textStyle: TypewriterStyle = {
-            display: 'inline-block',
-        };
-
-        const cursorStyle: TypewriterStyle = {
-            marginLeft: '7px',
-            display: 'inline-block',
-        };
-
-        if (typewriterDiv) {
-            Object.assign(typewriterDiv.style, typewriterStyle);
+      if (localState.isTyping) {
+        if (localState.charIndex < currentMessage.length) {
+          setText(currentMessage.slice(0, localState.charIndex + 1));
+          localState.charIndex++;
+          localState.timeout = setTimeout(step, typingSpeed);
+        } else {
+          localState.isTyping = false;
+          localState.timeout = setTimeout(step, pause * 100);
         }
-
-        if (textDiv) {
-            Object.assign(textDiv.style, textStyle);
+      } else {
+        if (localState.charIndex > 0) {
+          setText(currentMessage.slice(0, localState.charIndex - 1));
+          localState.charIndex--;
+          localState.timeout = setTimeout(step, typingSpeed / 4);
+        } else {
+          localState.isTyping = true;
+          localState.currentMessageIndex =
+            (localState.currentMessageIndex + 1) % messages.length;
+          localState.timeout = setTimeout(step, pause * 100);
         }
+      }
+    };
 
-        if (cursorDiv) {
-            Object.assign(cursorDiv.style, cursorStyle);
-        }
+    step();
 
-        const typingConfig = {
-            count: 0,
-            current: 0,
-            typing: {
-                speed: typingSpeed,
-            },
-            cursor: {
-                delay: cursorDelay,
-                symbol: cursorSymbol,
-                active: cursorSymbol,
-            },
-        };
+    return () => {
+      if (localState.timeout) clearTimeout(localState.timeout);
+    };
+  }, [messages, pause, typingSpeed]);
 
-        const cursorAnimation = setInterval(() => {
-            if (typingConfig.cursor.active === typingConfig.cursor.symbol) {
-                typingConfig.cursor.active = '';
-            } else {
-                typingConfig.cursor.active = typingConfig.cursor.symbol;
-            }
-            cursorDiv.innerHTML = typingConfig.cursor.active;
-        }, typingConfig.cursor.delay);
+  const defaultStyles: StyleConfig = {
+    wrapper: {
+      fontSize: '2em',
+      fontFamily: 'arial',
+      background: 'black',
+      color: 'white',
+      borderRadius: '5px',
+      width: 'fit-content',
+      padding: '5px 20px 5px 15px',
+      lineHeight: '1.4em',
+    },
+    text: {
+      display: 'inline-block',
+    },
+    cursor: {
+      display: 'inline-block',
+      marginLeft: '7px',
+    },
+  };
 
-        const typing = () => {
-            const message = messages[typingConfig.current] as string;
-            if (typingConfig.count < message.length) {
-                const m = message.charAt(typingConfig.count);
-                textDiv.innerHTML += m;
-                typingConfig.count++;
-                setTimeout(typing, typingConfig.typing.speed);
-            } else {
-                const waitInterval = setInterval(() => {
-                    clearInterval(waitInterval);
-                    typingConfig.count = 0;
-                    backspace();
-                }, pause * 100);
-            }
-        };
+  const mergedStyle = {
+    wrapper: { ...defaultStyles.wrapper, ...style.wrapper },
+    text: { ...defaultStyles.text, ...style.text },
+    cursor: { ...defaultStyles.cursor, ...style.cursor },
+  };
 
-        const backspace = () => {
-            const message = messages[typingConfig.current] as string;
-            if (typingConfig.count <= message.length) {
-                let m = '';
-                if (typingConfig.count === 0) {
-                    m = message;
-                } else {
-                    m = message.slice(0, -typingConfig.count);
-                }
-                textDiv.innerHTML = m;
-                typingConfig.count++;
-                if (messages.length !== 1) {
-                    setTimeout(backspace, typingConfig.typing.speed / 10);
-                }
-            } else {
-                textDiv.innerHTML = '';
-                if (messages.length) {
-                    if (messages.length - 1 === typingConfig.current || typingConfig.current > messages.length - 1) {
-                        typingConfig.current = 0;
-                    } else {
-                        typingConfig.current++;
-                    }
-                }
-                const waitInterval = setInterval(() => {
-                    clearInterval(waitInterval);
-                    typingConfig.count = 0;
-                    typing();
-                }, pause * 100);
-            }
-        };
-
-        cursorAnimation;
-        typing();
-        hasMounted.current = true;
-
-    }, [messages, pause, typingSpeed, cursorDelay, cursorSymbol]);
-
-
-    return <div id="typewriter" ref={typewriterRef}></div>;
+  return (
+    <div style={mergedStyle.wrapper}>
+      <div style={mergedStyle.text}>{text}</div>
+      <div style={mergedStyle.cursor}>{cursorVisible ? cursorSymbol : ''}</div>
+    </div>
+  );
 };
 
 export default Typewriter;
