@@ -1,7 +1,6 @@
 import Typewriter from './Typewriter';
 
 const App = () => {
-
   const messages = [
     'Typewriter :)',
     'hello',
@@ -15,8 +14,19 @@ const App = () => {
         messages={messages}
         pause={10}
         typingSpeed={50}
-        cursorDelay={200}
+        cursorDelay={400}
         cursorSymbol="|"
+        style={{
+          wrapper: {
+            background: '#111',
+            color: '#fff',
+            borderRadius: '10px',
+          },
+          cursor: {
+            color: '#0f0',
+            fontWeight: 'bold',
+          },
+        }}
       />
     </div>
   );

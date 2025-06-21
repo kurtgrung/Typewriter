@@ -1,9 +1,6 @@
-<script type="text/javascript" src="Typewriter.js"></script>
-
+<script src="Typewriter.js"></script>
 <script>
-
     document.addEventListener('DOMContentLoaded', function () {
-
         const messages = [
             'Typewriter :)',
             'hello',
@@ -11,21 +8,25 @@
             '...and another message!',
         ];
 
-        new Typewriter(document.getElementById("typewriter"), messages, {
+        new Typewriter(document.getElementById('typewriter'), messages, {
             pause: 10,
             count: 0,
             current: 0,
-            typing: {
-                speed: 50,
-            },
+            typing: { speed: 50 },
             cursor: {
                 delay: 200,
                 symbol: '|',
-            }
+                color: '#0f0',
+            },
+            style: {
+                background: '#111',
+                color: '#fff',
+                fontFamily: 'arial',
+                borderRadius: '8px',
+                height: '50px',
+            },
         });
-
     });
-
 </script>
 
 <div id="typewriter"></div>
