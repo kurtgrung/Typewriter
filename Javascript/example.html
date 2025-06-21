@@ -11,18 +11,32 @@
             '...and another message!',
         ];
 
-        new Typewriter(document.getElementById("typewriter"), messages, {
-            pause: 10,
-            count: 0,
-            current: 0,
-            typing: {
-                speed: 50,
-            },
-            cursor: {
-                delay: 200,
-                symbol: '|',
+        new Typewriter(
+            messages,
+            {
+                pause: 10,
+                count: 0,
+                current: 0,
+                typing: {
+                    speed: 50,
+                },
+                cursor: {
+                    delay: 200,
+                    symbol: '|',
+                },
+                style: {
+                    wrapper: {
+                        background: '#111',
+                        color: '#fff',
+                        borderRadius: '8px',
+                    },
+                    cursor: {
+                        color: '#0f0',
+                        fontWeight: 'bold',
+                    },
+                },
             }
-        });
+        );
 
     });
 
