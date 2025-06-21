@@ -1,120 +1,105 @@
 // Typewriter by Kurt Grüng.
 
 class Typewriter {
+  constructor(messages, config) {
+    const typewriterDiv = document.getElementById('typewriter');
 
-    constructor(div, messages, config) {
+    const textDiv = document.createElement('div');
+    textDiv.setAttribute('id', 'text');
+    typewriterDiv.appendChild(textDiv);
 
-        if (!div) return;
+    const cursorDiv = document.createElement('div');
+    cursorDiv.setAttribute('id', 'cursor');
+    typewriterDiv.appendChild(cursorDiv);
 
-        const typewriterDiv = div;
+    const defaultStyles = {
+      wrapper: {
+        fontSize: '2em',
+        fontFamily: 'arial',
+        background: 'black',
+        color: 'white',
+        borderRadius: '5px',
+        width: 'fit-content',
+        padding: '5px',
+        paddingLeft: '15px',
+        paddingRight: '20px',
+        lineHeight: '1.4em',
+      },
+      text: {
+        display: 'inline-block',
+      },
+      cursor: {
+        marginLeft: '7px',
+        display: 'inline-block',
+      },
+    };
 
-        config.cursor.symbol = config.cursor.symbol || "|";
-        config.cursor.active = config.cursor.symbol;
+    const styleConfig = config.style || {};
+    const mergedStyles = {
+      wrapper: { ...defaultStyles.wrapper, ...(styleConfig.wrapper || {}) },
+      text: { ...defaultStyles.text, ...(styleConfig.text || {}) },
+      cursor: { ...defaultStyles.cursor, ...(styleConfig.cursor || {}) },
+    };
 
-        const textDiv = document.createElement('div');
-        textDiv.setAttribute("id", "text");
-        document.getElementById('typewriter').appendChild(textDiv);
+    Object.assign(typewriterDiv.style, mergedStyles.wrapper);
+    Object.assign(textDiv.style, mergedStyles.text);
+    Object.assign(cursorDiv.style, mergedStyles.cursor);
 
-        const cursorDiv = document.createElement('div');
-        cursorDiv.setAttribute("id", "cursor");
-        document.getElementById('typewriter').appendChild(cursorDiv);
+    this.messages = messages;
+    this.config = config;
+    this.cursor = cursorDiv;
+    this.text = textDiv;
 
-        const typewriterStyle = {
-            fontSize: "2em",
-            fontFamily: "arial",
-            background: "black",
-            color: "white",
-            borderRadius: "5px",
-            width: "fit-content",
-            padding: "5px",
-            paddingLeft: "15px",
-            paddingRight: "20px",
-            lineHeight: "1.4em",
-            height: "50px",
-        }
+    this.cursorSymbol = config.cursor.symbol || '|';
 
-        const textStyle = {
-            display: "inline-block"
-        }
+    this.cursorAnimation = setInterval(() => {
+      this.config.cursor.symbol = this.config.cursor.symbol === '|' ? '' : '|';
+      this.cursor.innerHTML = this.config.cursor.symbol;
+    }, config.cursor.delay);
 
-        const cursorStyle = {
-            marginLeft: "7px",
-            display: "inline-block",
-        }
+    this.typing();
+  }
 
-        for (let style in typewriterStyle) {
-            typewriterDiv.style[style] = typewriterStyle[style];
-        }
+  typing() {
+    const message = this.messages[this.config.current];
 
-        for (let style in textStyle) {
-            textDiv.style[style] = textStyle[style];
-        }
+    if (this.config.count < message.length) {
+      const m = message.charAt(this.config.count);
+      this.text.innerHTML += m;
+      this.config.count++;
+      setTimeout(() => this.typing(), this.config.typing.speed);
+    } else {
+      const waitInterval = setInterval(() => {
+        clearInterval(waitInterval);
+        this.config.count = 0;
+        this.backspace();
+      }, this.config.pause * 100);
+    }
+  }
 
-        for (let style in cursorStyle) {
-            cursorDiv.style[style] = cursorStyle[style];
-        }
+  backspace() {
+    const message = this.messages[this.config.current];
 
-        this.messages = messages;
-        this.config = config;
-        this.cursor = cursorDiv;
-        this.text = textDiv;
-        this.cursorSymbol = this.config.cursor.symbol ? this.config.cursor.symbol : "|";
-        this.cursorAnimation = setInterval(() => {
-            if (this.config.cursor.active === this.config.cursor.symbol) {
-                this.config.cursor.active = '';
-            } else {
-                this.config.cursor.active = this.config.cursor.symbol;
-            }
-            this.cursor.innerHTML = this.config.cursor.active;
-        }, this.config.cursor.delay);
+    if (this.config.count < message.length) {
+      let m = this.config.count === 0 ? message : message.slice(0, -this.config.count);
+      this.text.innerHTML = m;
+      this.config.count++;
+
+      if (this.messages.length !== 1) {
+        setTimeout(() => this.backspace(), this.config.typing.speed / 10);
+      }
+    } else {
+      this.text.innerHTML = '';
+      if (this.messages.length) {
+        this.config.current =
+          this.config.current >= this.messages.length - 1 ? 0 : this.config.current + 1;
+      }
+
+      const waitInterval = setInterval(() => {
+        clearInterval(waitInterval);
+        this.config.count = 0;
         this.typing();
+      }, this.config.pause * 100);
     }
-
-    typing() {
-
-        const message = this.messages[this.config.current];
-        if (this.config.count < message.length) {
-            const m = message.charAt(this.config.count);
-            this.text.innerHTML += m;
-            this.config.count++;
-            setTimeout(() => this.typing(), this.config.typing.speed);
-        } else {
-            const waitInterval = setInterval(() => {
-                clearInterval(waitInterval);
-                this.config.count = 0;
-                this.backspace();
-            }, this.config.pause * 100);
-        }
-    }
-
-    backspace() {
-        const message = this.messages[this.config.current];
-        if (this.config.count < message.length) {
-            let m = "";
-            if (this.config.count === 0) {
-                m = message;
-            } else {
-                m = message.slice(0, -this.config.count);
-            }
-            this.text.innerHTML = m;
-            this.config.count++;
-            if (this.messages.length !== 1) {
-                setTimeout(() => this.backspace(), this.config.typing.speed / 10);
-            }
-        } else {
-            this.text.innerHTML = "";
-            if (this.messages.length) {
-                if (this.messages.length - 1 === this.config.current || this.config.current > this.messages.length - 1) {
-                    this.config.current = 0;
-                } else {
-                    this.config.current++;
-                }
-            }
-            const waitInterval = setInterval(() => {
-                clearInterval(waitInterval);
-                this.config.count = 0;
-                this.typing();
-            }, this.config.pause * 100);
-        }
-    }
+  }
 }
